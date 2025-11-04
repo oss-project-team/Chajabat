@@ -15,6 +15,7 @@ app.config['SECRET_KEY'] = 'rhwkddksskrpgowntpdy'
 
 # (임시) 데이터베이스 대신 파이썬 딕셔너리(변수)를 사용합니다.
 # (서버를 껐다 켜면 회원가입한 정보가 사라집니다.)
+# [자료구조] 이메일별 인증코드 저장용 해시테이블 (빠른 조회)
 users = {} 
 posts = []              # 분실/습득 게시글 목록
 messages = []           # 쪽지 목록
@@ -101,6 +102,7 @@ def verify_code():
 def check_nickname():
     """닉네임 중복 여부 확인"""
     nickname = request.args.get('nickname')
+    #[알고리즘] 선형 탐색(Linear Search): 모든 유저 순회하며 중복 닉네임 검사
     for user in users.values():
         if user['nickname'] == nickname:
             return jsonify({"available": False}), 200
@@ -250,6 +252,7 @@ def list_posts():
 
     filtered = posts
 
+    #[알고리즘] 필터링 로직 (리스트 컴프리헨션 기반, 조건문 탐색)
     # 필터 적용
     if post_type:
         filtered = [p for p in filtered if p['type'] == post_type]
@@ -267,10 +270,12 @@ def list_posts():
             or q_lower in (p['content'] or '').lower()
         ]
 
+    #[알고리즘] 정렬: created_at 기준으로 최신순/오래된순 정렬    
     # 정렬
     reverse = True if sort == 'latest' else False
     filtered = sorted(filtered, key=lambda p: p['created_at'], reverse=reverse)
 
+    # [자료구조] 활용 슬라이싱(start:end)으로 부분 리스트 반환
     # 페이지네이션
     total = len(filtered)
     start = (page - 1) * size
@@ -386,7 +391,8 @@ def send_message():
 # 2) 받은 쪽지함
 @app.route('/api/v1/messages/inbox', methods=['GET'])
 @login_required
-def inbox():
+def inbox(): 
+    #[알고리즘] 리스트 필터링 + 정렬
     email = request.user_email
     inbox_msgs = [m for m in messages if m['recipient_email'] == email]
     inbox_msgs = sorted(inbox_msgs, key=lambda m: m['created_at'], reverse=True)

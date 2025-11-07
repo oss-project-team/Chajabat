@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify  # Flask 서버 관련
 import jwt            # JWT 토큰 생성 관련
+import uuid           # Refresh 토큰 생성 관련
 import bcrypt         # 비밀번호 암호화 관련
 import datetime       # 토큰 만료 시간 설정 관련
 from functools import wraps  # 데코레이터 (로그인 체크용)
@@ -23,6 +24,7 @@ keywords = []           # 키워드 알림 목록
 alerts = []             # 키워드 알림 발생 기록
 email_codes = {}        # 이메일 인증코드 저장용
 verified_emails = set() # 이메일 인증코드 통과확인용
+refresh_tokens_db = {}  # Refresh 토큰을 저장하는 임시 DB
 
 next_post_id = 1
 next_message_id = 1
@@ -161,22 +163,92 @@ def login():
     # (검증 2) 유저가 있고, 암호화된 비밀번호가 일치하는지 확인
     if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
         
-        # (토큰 생성) 로그인 성공 시, 1시간 동안 유효한 JWT 토큰 생성
-        token = jwt.encode({
+        # (토큰 생성) 로그인 성공 시, 30분 동안 유효한 JWT 토큰 생성
+        access_token = jwt.encode({
             'email': email, 
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1) 
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # 보안상의 이유로 30분 사용을 권장해서 30분으로 변경했습니다.
         }, app.config['SECRET_KEY'], algorithm="HS256")
+
+        # [추가] Refresh Token 생성 (7일 유효)
+        refresh_token = str(uuid.uuid4()) # DB 저장을 위해 고유한 UUID 생성
+        refresh_exp = datetime.datetime.utcnow() + datetime.timedelta(days=7)
         
+        # [추가] Refresh Token을 서버 DB에 저장 (이메일당 하나의 RT만 허용)
+        refresh_tokens_db[email] = {
+            'token': refresh_token,
+            'exp': refresh_exp
+        }
+
         # 200: OK (성공)
-        return jsonify({'access_token': token}), 200
+        return jsonify({'access_token': access_token, 'refresh_token': refresh_token}), 200
     else:
         # 401: Unauthorized (인증 실패)
         return jsonify({"error": "이메일 또는 비밀번호가 일치하지 않습니다."}), 401
     
+# (추가) 토큰 재발급
+@app.route('/api/v1/auth/refresh', methods=['POST'])
+def refresh_token():
+    data = request.json
+    client_refresh_token = data.get('refresh_token')
+    expired_access_token = data.get('access_token') 
+
+    if not client_refresh_token or not expired_access_token:
+        return jsonify({"error": "필수 토큰이 누락되었습니다."}), 401
+    
+    try:
+        # 만료된 Access Token에서 email 추출
+        access_payload = jwt.decode(
+            expired_access_token, 
+            app.config['SECRET_KEY'], 
+            algorithms=["HS256"],
+            # 만료/서명 검증 없이 payload만 읽어 email을 추출
+            options={"verify_signature": False, "verify_exp": False} 
+        )
+        email = access_payload.get('email')
+
+        # 서버 저장소의 Refresh Token 정보 가져오기
+        stored_token_info = refresh_tokens_db.get(email)
+        
+        if not stored_token_info:
+            return jsonify({"error": "유효하지 않은 Refresh Token입니다. (서버 정보 없음)"}), 401
+
+        # UUID 일치 및 만료 시간 확인 (핵심 검증)
+        is_token_match = stored_token_info['token'] == client_refresh_token
+        is_not_expired = stored_token_info['exp'] > datetime.datetime.utcnow()
+
+        if is_token_match and is_not_expired:
+            
+            # 새로운 Access Token 생성 (30분 유효)
+            new_access_token = jwt.encode({
+                'email': email, 
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30) 
+            }, app.config['SECRET_KEY'], algorithm="HS256")
+            
+            return jsonify({'access_token': new_access_token}), 200
+        
+        # Refresh Token 만료 처리
+        if not is_not_expired:
+            del refresh_tokens_db[email]
+            return jsonify({"error": "Refresh Token이 만료되었습니다. 다시 로그인해주세요."}), 401
+        
+        # 토큰 불일치 (탈취 의심)
+        if not is_token_match:
+            return jsonify({"error": "토큰이 일치하지 않습니다. 비정상적인 접근입니다."}), 401
+
+    except Exception:
+        return jsonify({"error": "토큰 재발급에 실패했습니다."}), 401
+    
+
 @app.route('/api/v1/auth/logout', methods=['POST'])
 @login_required
 def logout():
     """🔵 로그아웃 (프론트에서 JWT 삭제)"""
+    email = request.user_email # 데코레이터에서 가져온 이메일
+    
+    # 서버 저장소에서 Refresh Token 삭제 (UUID 무효화)
+    if email in refresh_tokens_db:
+        del refresh_tokens_db[email]
+
     return jsonify({"message": "로그아웃 되었습니다."}), 200
 
 # 5. 게시판 (Post - CRUD + 상태 관리 + 검색/필터)

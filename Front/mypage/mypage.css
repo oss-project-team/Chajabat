@@ -57,9 +57,29 @@ body{
     overflow:hidden;border:1px solid #eee;}
 .menu-header{padding:16px;font-size:16px;font-weight:600;cursor:pointer;}
 .menu-content{display:none;padding:16px;border-top:1px solid #eee;}
+.menu-content label{
+    display:block;
+    font-size:14px;
+    font-weight:500;
+    color:#333;
+    margin-bottom:8px;
+    margin-top:12px;
+}
+.menu-content label:first-child{
+    margin-top:0;
+}
 .menu-content input{
-    width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;
+    width:100%;
+    padding:12px 14px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:15px;
     margin-bottom:12px;
+    box-sizing:border-box;
+}
+.menu-content input:focus{
+    outline:none;
+    border-color:#009ab7;
 }
 
 /* 내 게시글 목록 */
@@ -133,6 +153,59 @@ body{
 }
 .add-btn:hover{
     background:#007f95;
+}
+
+/* 닉네임 입력 영역 */
+.menu-content > div[style*="display: flex"]{
+    display:flex !important;
+    gap:8px;
+    align-items:stretch;
+    margin-bottom:4px;
+}
+.menu-content > div[style*="display: flex"] input{
+    margin-bottom:0;
+    height:44px;
+    flex:1;
+}
+.menu-content > div[style*="display: flex"] .check-btn{
+    height:44px;
+    margin:0;
+}
+
+/* 중복 확인 버튼 */
+.check-btn{
+    padding:0 18px;
+    background:#009ab7;
+    color:#fff;
+    border:none;
+    font-size:14px;
+    font-weight:600;
+    border-radius:6px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:.2s;
+    height:44px;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.check-btn:hover{
+    background:#007f95;
+}
+.check-btn:disabled{
+    background:#ccc;
+    cursor:not-allowed;
+}
+
+/* 닉네임 입력 에러 스타일 */
+#nicknameError{
+    margin-top:6px;
+    margin-bottom:8px;
+    min-height:18px;
+}
+#nickInput.error{
+    border-color:#f44336;
 }
 
 

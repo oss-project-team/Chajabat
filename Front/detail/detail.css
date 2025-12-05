@@ -30,7 +30,7 @@ body {
 /* 대표 이미지 */
 .detail-image-box {
     width: 100%;
-    background:#ddd;
+    background: #ddd;
 }
 
 .detail-image-box img {
@@ -48,11 +48,17 @@ body {
     border-bottom:1px solid #eee;
 }
 
-.user-info {display:flex;align-items:center;gap:10px;}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
 .user-profile {
-    width:40px;height:40px;
-    background:#ddd;border-radius:50%;
+    width: 40px;
+    height: 40px;
+    background: #ddd;
+    border-radius: 50%;
 }
 
 .user-name {
@@ -61,53 +67,149 @@ body {
 }
 
 .user-status {
-    display:flex;align-items:center;gap:6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .status-dot {
-    width:10px;height:10px;
-    background:#ff9800;border-radius:50%;
+    width: 10px;
+    height: 10px;
+    background: #ff9800;
+    border-radius: 50%;
+}
+
+.status-toggle-btn {
+    background:none;
+    border:none;
+    padding:4px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#666;
+    transition:color 0.2s;
+    margin-left:4px;
+    border-radius:50%;
+    width:28px;
+    height:28px;
+}
+
+.status-toggle-btn:hover {
+    color:#009ab7;
+    background:#f0f0f0;
+}
+
+.status-toggle-btn .material-icons {
+    font-size:20px;
+    transition:transform 0.3s;
 }
 
 /* 내용 카드 */
 .detail-card {
-    margin:16px;
-    background:#fff;
-    padding:20px;
-    border-radius:16px;
-    border:1px solid #eee;
+    margin: 16px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #eee;
 }
 
 .detail-category {
-    font-size:14px;font-weight:600;
-    color:#009ab7;
+    font-size: 14px;
+    font-weight: 600;
+    color: #009ab7;
 }
 
 .detail-title {
-    font-size:20px;font-weight:700;margin-top:8px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 8px;
 }
 
 .detail-desc {
-    margin-top:12px;color:#333;
-    line-height:1.6;
+    margin-top: 12px;
+    color: #333;
+    line-height: 1.6;
 }
 
 /* 정보box */
-.detail-info-box {margin-top:20px;}
-
-.info-row {
-    display:flex;
-    justify-content:space-between;
-    padding:6px 0;
+.detail-info-box {
+    margin-top: 20px;
 }
 
-.info-label {color:#666;}
-.info-value {font-weight:600;}
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.info-label {
+    color: #666;
+}
+
+.info-value {
+    font-weight: 600;
+}
 
 /* 버튼 */
-.btn-wrap {margin:20px;}
+.btn-wrap {
+    margin: 20px;
+}
+
 .btn-msg {
-    width:100%;padding:16px;border:none;
-    border-radius:30px;background:#009ab7;
-    color:#fff;font-size:16px;font-weight:600;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 30px;
+    background: #009ab7;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* 작성자용 버튼 영역 */
+.author-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-edit {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 30px;
+    background: #009ab7;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-edit:hover {
+    background: #0088a3;
+}
+
+.btn-delete {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 30px;
+    background: #f44336;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-delete:hover {
+    background: #da190b;
 }

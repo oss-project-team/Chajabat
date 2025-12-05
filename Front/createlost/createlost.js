@@ -3,7 +3,13 @@
    (모달 미리보기 + 저장 완료 모달 적용 완료)
 ============================================ */
 
+/* URL 파라미터 (edit 모드 확인) */
+const params = new URLSearchParams(window.location.search);
+const editId = params.get("edit");
+const origin = params.get("origin");
+
 let postData = {
+    id: editId ? Number(editId) : Date.now(),
     images: [],
     title: "",
     description: "",
@@ -16,7 +22,11 @@ let postData = {
    🔙 뒤로가기
 ------------------------------------ */
 document.getElementById("backBtn").addEventListener("click", () => {
-    history.back();
+    if (origin === "detail") {
+        history.back();
+    } else {
+        history.back();
+    }
 });
 
 /* ------------------------------------
@@ -151,16 +161,42 @@ document.getElementById("confirmBtn").addEventListener("click", () => {
 
     let lostPosts = JSON.parse(localStorage.getItem("lostPosts")) || [];
 
-    lostPosts.push({
-        id: Date.now(),
-        img: postData.images[0] ? postData.images[0].url : null,
-        title: postData.title,
-        description: postData.description,
-        place: postData.location,
-        date: postData.lostDate,
-        solved: false,
-        category: postData.category
-    });
+    // 닉네임 가져오기 (회원가입 시 저장된 닉네임)
+    let nickname = localStorage.getItem("nickname");
+    if (!nickname || nickname.trim() === "") {
+        nickname = "사용자" + Date.now().toString().slice(-6);
+        localStorage.setItem("nickname", nickname);
+    }
+
+    if (editId) {
+        // 수정 모드
+        lostPosts = lostPosts.map(p =>
+            p.id == editId
+                ? {
+                    ...p,
+                    title: postData.title,
+                    description: postData.description,
+                    category: postData.category,
+                    place: postData.location,
+                    date: postData.lostDate,
+                    img: postData.images[0] ? postData.images[0].url : null
+                }
+                : p
+        );
+    } else {
+        // 신규 작성
+        lostPosts.push({
+            id: postData.id,
+            img: postData.images[0] ? postData.images[0].url : null,
+            title: postData.title,
+            description: postData.description,
+            place: postData.location,
+            date: postData.lostDate,
+            solved: false,
+            category: postData.category,
+            author: nickname.trim()
+        });
+    }
 
     localStorage.setItem("lostPosts", JSON.stringify(lostPosts));
 
@@ -168,8 +204,44 @@ document.getElementById("confirmBtn").addEventListener("click", () => {
     document.getElementById("uploadModal").classList.add("show");  // ← 저장 완료 모달 실행
 });
 
-/* 저장 완료 모달 확인 → 홈 이동 */
+/* 저장 완료 모달 확인 → 홈 또는 detail 이동 */
 document.getElementById("uploadOkBtn").addEventListener("click", () => {
     document.getElementById("uploadModal").classList.remove("show");
-    window.location.href = "../home/home.html?type=Lost";
+    if (editId && origin === "detail") {
+        window.location.href = `../detail_lost/detail_lost.html?id=${editId}`;
+    } else {
+        window.location.href = "../home/home.html?type=Lost";
+    }
+});
+
+/* 수정모드 데이터 로드 */
+function loadEditData() {
+    if (!editId) return;
+
+    let posts = JSON.parse(localStorage.getItem("lostPosts")) || [];
+    const target = posts.find(p => p.id == editId);
+    if (!target) return;
+
+    titleInput.value = target.title;
+    descInput.value = target.description;
+    document.getElementById("location").value = target.place;
+    document.getElementById("lostDate").value = target.date;
+    titleCount.textContent = target.title.length;
+    descCount.textContent = target.description.length;
+
+    postData.category = target.category;
+    postData.images = target.img ? [{ url: target.img }] : [];
+
+    document.querySelectorAll(".category-btn").forEach(btn => {
+        if (btn.dataset.category === target.category) {
+            btn.classList.add("active");
+        }
+    });
+
+    renderPreview();
+}
+
+// 페이지 로드 시 수정 모드 데이터 로드
+document.addEventListener("DOMContentLoaded", () => {
+    loadEditData();
 });

@@ -121,6 +121,13 @@ function savePost() {
                 : p
         );
     } else {
+        // 회원가입 시 저장된 닉네임 사용
+        let nickname = localStorage.getItem("nickname");
+        // nickname이 없으면 기본값 설정 및 저장
+        if (!nickname || nickname.trim() === "") {
+            nickname = "사용자" + Date.now().toString().slice(-6);
+            localStorage.setItem("nickname", nickname);
+        }
         posts.push({
             id: postData.id,
             title: postData.title,
@@ -129,7 +136,8 @@ function savePost() {
             place: postData.location,
             date: postData.foundDate,
             img: postData.images[0] || null,
-            solved: false
+            solved: false,
+            author: nickname.trim()
         });
     }
 
@@ -152,6 +160,8 @@ function setupEvents() {
     backBtn.addEventListener("click", () => {
         if (origin === "search") {
             window.location.href = "../search/search.html";
+        } else if (origin === "detail") {
+            history.back();
         } else {
             window.location.href = "../home/home.html";
         }
@@ -230,9 +240,13 @@ function setupEvents() {
         showUploadModal();
     });
 
-    /* 업로드 완료 → 홈 이동 */
+    /* 업로드 완료 → 홈 또는 detail 이동 */
     uploadOkBtn.addEventListener("click", () => {
-        window.location.href = "../home/home.html";
+        if (editId && origin === "detail") {
+            window.location.href = `../detail/detail.html?id=${editId}`;
+        } else {
+            window.location.href = "../home/home.html";
+        }
     });
 }
 

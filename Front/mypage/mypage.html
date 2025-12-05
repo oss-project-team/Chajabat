@@ -36,12 +36,16 @@
         <div class="menu-header">프로필 관리</div>
         <div class="menu-content">
             <label>닉네임 변경</label>
-            <input type="text" id="nickInput" placeholder="새 닉네임 입력">
+            <div style="display: flex; gap: 8px; align-items: stretch;">
+                <input type="text" id="nickInput" placeholder="새 닉네임 입력" style="flex: 1;">
+                <button class="check-btn" id="checkNicknameBtn" onclick="checkNickname()">중복 확인</button>
+            </div>
+            <div id="nicknameError" style="color: #f44336; font-size: 12px; margin-top: 4px;"></div>
 
             <label>프로필 이미지 변경</label>
             <input type="file" id="profileUpload">
 
-            <button class="save-btn" onclick="saveProfile()">저장</button>
+            <button class="save-btn" id="saveProfileBtn" onclick="saveProfile()">저장</button>
         </div>
     </div>
 

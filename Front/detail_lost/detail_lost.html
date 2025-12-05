@@ -35,6 +35,9 @@
             <div class="user-status">
                 <span class="status-dot"></span>
                 <span class="status-text">해결 중</span>
+                <button id="statusToggleBtn" class="status-toggle-btn" style="display: none;" title="상태 전환">
+                    <i class="material-icons">sync</i>
+                </button>
             </div>
         </div>
 
@@ -47,20 +50,29 @@
 
             <div class="detail-info-box">
                 <div class="info-row">
-                    <span class="info-label">습득 장소</span>
+                    <span class="info-label">분실 장소</span>
                     <span class="info-value" id="detailPlace"></span>
                 </div>
 
                 <div class="info-row">
-                    <span class="info-label">습득 날짜</span>
+                    <span class="info-label">분실 날짜</span>
                     <span class="info-value" id="detailDate"></span>
                 </div>
             </div>
         </div>
 
-        <!-- 🔥 contact로 info 전달 버튼 -->
-        <div class="btn-wrap">
-            <button id="msgBtn" class="btn-msg">쪽지보내기</button>
+        <!-- 🔥 버튼 영역 (작성자/일반 사용자 구분) -->
+        <div class="btn-wrap" id="btnWrap">
+            <!-- 일반 사용자용: 쪽지 보내기 -->
+            <button id="msgBtn" class="btn-msg" style="display: none;">쪽지 보내기</button>
+            
+            <!-- 작성자용: 수정/삭제 -->
+            <div id="authorBtns" class="author-btns" style="display: none;">
+                <div class="btn-group">
+                    <button id="editBtn" class="btn-edit">수정하기</button>
+                    <button id="deleteBtn" class="btn-delete">삭제하기</button>
+                </div>
+            </div>
         </div>
 
     </div>

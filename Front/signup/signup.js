@@ -340,6 +340,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
       
       if (response.ok) {
+        // localStorage에 닉네임 저장
+        if (signupData.nickname) {
+          localStorage.setItem("nickname", signupData.nickname);
+        }
         alert('회원가입이 완료되었습니다!');
         window.location.href = '../login/login.html';
       } else {
@@ -349,7 +353,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     } catch (error) {
       console.error('회원가입 오류:', error);
-      // 임시 처리: 서버 없을 때
+      // 임시 처리: 서버 없을 때 - localStorage에 닉네임 저장
+      if (signupData.nickname) {
+        localStorage.setItem("nickname", signupData.nickname);
+      }
       alert('회원가입이 완료되었습니다! (임시)');
       window.location.href = '../login/login.html';
     }

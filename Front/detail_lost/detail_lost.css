@@ -12,9 +12,7 @@ body {
     min-height: 100vh;
 }
 
-
-/* 🔙 헤더 */
-
+/* 헤더 */
 .detail-header {
     padding: 16px;
 }
@@ -22,18 +20,17 @@ body {
 .detail-header button {
     background: none;
     border: none;
+    padding: 0;
 }
 
 .detail-header i {
     font-size: 28px;
 }
 
-
-/* 🔥 큰 이미지 */
-
+/* 대표 이미지 */
 .detail-image-box {
     width: 100%;
-    height: auto;
+    background: #ddd;
 }
 
 .detail-image-box img {
@@ -43,8 +40,7 @@ body {
 }
 
 
-/* 🔥 작성자 정보 */
-
+/* 사용자 정보 */
 .detail-user-section {
     display: flex;
     justify-content: space-between;
@@ -84,9 +80,34 @@ body {
     border-radius: 50%;
 }
 
+.status-toggle-btn {
+    background:none;
+    border:none;
+    padding:4px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#666;
+    transition:color 0.2s;
+    margin-left:4px;
+    border-radius:50%;
+    width:28px;
+    height:28px;
+}
 
-/* 내용 박스 */
+.status-toggle-btn:hover {
+    color:#009ab7;
+    background:#f0f0f0;
+}
 
+.status-toggle-btn .material-icons {
+    font-size:20px;
+    transition:transform 0.3s;
+}
+
+
+/* 내용 카드 */
 .detail-card {
     margin: 16px;
     background: #fff;
@@ -113,9 +134,7 @@ body {
     line-height: 1.6;
 }
 
-
-/* 정보 박스 */
-
+/* 정보box */
 .detail-info-box {
     margin-top: 20px;
 }
@@ -134,9 +153,7 @@ body {
     font-weight: 600;
 }
 
-
-/* 🔥 쪽지 버튼 */
-
+/* 버튼 */
 .btn-wrap {
     margin: 20px;
 }
@@ -153,32 +170,51 @@ body {
     cursor: pointer;
 }
 
-
-
-/* =========================================================
-   🔥 버튼 클릭 안되는 문제 해결(최종 수정)
-========================================================= */
-
-/* 이미지가 클릭 영역을 잡아먹지 않도록 */
-.detail-image-box,
-.detail-image-box img {
-    pointer-events: none;
+/* 작성자용 버튼 영역 */
+.author-btns {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
 }
 
-/* 버튼이 항상 맨 위 레이어에 있도록 */
-.btn-wrap,
-.btn-msg {
-    position: relative;
-    z-index: 999;
+.btn-group {
+    display:flex;
+    gap:12px;
 }
 
-/* 내용보다 위에 배치 */
-.detail-card {
-    position: relative;
-    z-index: 10;
+.btn-edit {
+    flex:1;
+    padding:16px;
+    border:none;
+    border-radius:30px;
+    background:#009ab7;
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.2s;
 }
 
-.page-wrapper {
-    position: relative;
-    z-index: 5;
+.btn-edit:hover {
+    background:#0088a3;
 }
+
+.btn-delete {
+    flex:1;
+    padding:16px;
+    border:none;
+    border-radius:30px;
+    background:#f44336;
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.2s;
+}
+
+.btn-delete:hover {
+    background:#da190b;
+}
+
+
+

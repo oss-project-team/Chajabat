@@ -7,6 +7,10 @@ from functools import wraps  # 데코레이터 (로그인 체크용)
 import random
 from flask_cors import CORS
 
+#(추가) 이메일 전송용 모듈
+import smtplib
+from email.mime.text import MIMEText
+
 # --- 서버 설정 ---
 
 # app이라는 이름의 Flask 서버를 생성
@@ -34,6 +38,29 @@ next_post_id = 1
 next_message_id = 1
 next_keyword_id = 1
 next_alert_id = 1
+
+# ------------------------------------------------------
+# (추가) 실제 이메일 전송 기능 (Gmail SMTP)
+# ------------------------------------------------------
+SMTP_EMAIL = "YOUR_GMAIL@gmail.com"     #  네 Gmail 주소
+SMTP_PASSWORD = "YOUR_APP_PASSWORD"      #  앱 비밀번호 (16자리)
+
+def send_email(to_email, code):
+    """ 실제 이메일 전송 함수 """
+    msg = MIMEText(f"인증코드는 다음과 같습니다:\n\n{code}\n\nCHAJABAT 서비스 인증용 코드입니다.")
+    msg['Subject'] = "CHAJABAT 인증코드"
+    msg['From'] = SMTP_EMAIL
+    msg['To'] = to_email
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(SMTP_EMAIL, SMTP_PASSWORD)
+        server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
+        server.quit()
+        print(f"[메일 발송 성공] {to_email} 로 인증코드 전송됨")
+    except Exception as e:
+        print("[메일 발송 오류] ", e)
 
 # ------------------------------------------------
 # 공통 유틸: 로그인된 사용자만 접근하게 하는 데코레이터
@@ -68,37 +95,61 @@ def login_required(f):
 
 
 # ------------------------------------------------
-# 1. 이메일 인증 (학교 이메일만 가능)
+# 0. 이메일 인증 
 # ------------------------------------------------
 @app.route('/api/v1/auth/send-code', methods=['POST'])
-def send_code():
-    """학교 이메일로 인증 코드 전송"""
+def send_code_route():
     data = request.json
     email = data.get('email')
 
-    if not email or not email.endswith('@edu.hanbat.ac.kr'):
-        return jsonify({"error": "학교 이메일(@edu.hanbat.ac.kr)만 가입 가능합니다."}), 400
+    if not email:
+        return jsonify({"error": "이메일을 입력해주세요."}), 400
 
     code = str(random.randint(100000, 999999))
     email_codes[email] = code
-    # print(Debug) 부분은 실제로 메일인증이 아닌 테스트용
-    print(f"[DEBUG] {email} 인증코드: {code}")
-    return jsonify({"message": "인증 코드가 전송되었습니다."}), 200
+
+    # 이메일 실제 발송
+    send_email(email, code)
+
+    return jsonify({"message": "인증 코드가 이메일로 전송되었습니다."}), 200
 
 
+# 인증코드 확인
+# ------------------------------------------------------
 @app.route('/api/v1/auth/verify-code', methods=['POST'])
 def verify_code():
-    """이메일 인증 코드 확인"""
     data = request.json
     email = data.get('email')
     code = data.get('code')
 
     if email_codes.get(email) == code:
         del email_codes[email]
-        verified_emails.add(email)  # 이메일 인증코드 통과확인
-        return jsonify({"message": "이메일 인증이 완료되었습니다."}), 200
-    else:
-        return jsonify({"error": "인증 코드가 올바르지 않습니다."}), 400
+        verified_emails.add(email)
+        return jsonify({"message": "이메일 인증 완료!"}), 200
+
+    return jsonify({"error": "인증 코드가 올바르지 않습니다."}), 400
+
+# ------------------------------------------------
+# 1. 비밀번호 재설정 기능 
+# ------------------------------------------------
+@app.route('/api/v1/auth/reset-password', methods=['POST'])
+def reset_password():
+    data = request.json
+    email = data.get('email')
+    new_pw = data.get('new_password')
+
+    if email not in verified_emails:
+        return jsonify({"error": "이메일 인증이 필요합니다."}), 400
+
+    if email not in users:
+        return jsonify({"error": "등록되지 않은 이메일입니다."}), 404
+
+    hashed = bcrypt.hashpw(new_pw.encode('utf-8'), bcrypt.gensalt())
+    users[email]['password'] = hashed
+
+    verified_emails.remove(email)
+
+    return jsonify({"message": "비밀번호가 변경되었습니다."}), 200
 
 
 # ------------------------------------------------
@@ -125,12 +176,11 @@ def signup():
     # 프론트가 보낸 데이터를 받습니다.
     data = request.json
     email = data.get('email')
-
     password = data.get('password')
     nickname = data.get('nickname')
-    # 이메일 인증 통과확인용
-    if email not in verified_emails:
-        return jsonify({"error": "이메일 인증을 먼저 완료해주세요."}), 400
+    # 기본 입력 체크
+    if not all([email, password, nickname]):
+        return jsonify({"error": "필수 정보를 모두 입력해주세요."}), 400
     
     # (검증) 이미 가입된 이메일인지 확인
     if email in users:
@@ -146,8 +196,8 @@ def signup():
         'password': hashed_password 
     }
     
-    # 가입성공시, 통과확인용 증표 삭제
-    verified_emails.remove(email)
+    
+   
 
     print("회원가입 성공:", users) #백엔드 개발자가 보는 서버 로그
     
@@ -246,7 +296,7 @@ def refresh_token():
 @app.route('/api/v1/auth/logout', methods=['POST'])
 @login_required
 def logout():
-    """🔵 로그아웃 (프론트에서 JWT 삭제)"""
+    """ 로그아웃 (프론트에서 JWT 삭제)"""
     email = request.user_email # 데코레이터에서 가져온 이메일
     
     # 서버 저장소에서 Refresh Token 삭제 (UUID 무효화)
@@ -294,7 +344,7 @@ def create_post():
     posts.append(post)
     next_post_id += 1
 
-    # 🔔 키워드 알림 체크 (간단 버전: 제목 + 내용 문자열에 keyword 포함 여부)
+    #  키워드 알림 체크 (간단 버전: 제목 + 내용 문자열에 keyword 포함 여부)
     text = (title or "") + " " + (content or "")
     for kw in keywords:
         if kw["keyword"] in text:

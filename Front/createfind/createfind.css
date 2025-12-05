@@ -17,9 +17,7 @@ body {
     background: #f7f7f7;
 }
 
-
 /* 상단 헤더 */
-
 .create-header {
     display: flex;
     align-items: center;
@@ -57,18 +55,14 @@ body {
     flex: 1;
 }
 
-
 /* 컨텐츠 영역 */
-
 .create-content {
     padding: 20px 16px;
     max-width: 600px;
     margin: 0 auto;
 }
 
-
 /* 섹션 공통 스타일 */
-
 .upload-section,
 .form-section {
     background: #fff;
@@ -85,9 +79,7 @@ body {
     margin-bottom: 12px;
 }
 
-
 /* 이미지 업로드 */
-
 .image-upload-container {
     display: flex;
     flex-wrap: wrap;
@@ -175,16 +167,12 @@ body {
     font-size: 12px;
 }
 
-
-/* 업로드 버튼 숨김 처리 (5장 도달 시) */
-
+/* 업로드 버튼 숨김 처리 */
 .image-upload-btn.hidden {
     display: none !important;
 }
 
-
 /* 입력 필드 */
-
 input[type="text"],
 textarea {
     width: 100%;
@@ -256,9 +244,7 @@ textarea {
     border-radius: 6px;
 }
 
-
 /* 카테고리 그리드 */
-
 .category-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -288,9 +274,7 @@ textarea {
     border-color: #009ab7;
 }
 
-
 /* 작성 완료 버튼 */
-
 .submit-btn {
     width: 100%;
     padding: 16px;
@@ -316,9 +300,7 @@ textarea {
     cursor: not-allowed;
 }
 
-
-/* 모달 */
-
+/* 공통 모달 오버레이 */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -438,9 +420,7 @@ textarea {
     background: #0088a3;
 }
 
-
 /* 이미지 뷰어 모달 */
-
 .image-viewer-modal {
     display: none;
     background: rgba(0, 0, 0, 0.9);
@@ -550,9 +530,7 @@ textarea {
     cursor: not-allowed;
 }
 
-
 /* 반응형 */
-
 @media (max-width: 375px) {
     .create-content {
         padding: 16px 12px;
@@ -569,4 +547,135 @@ textarea {
     .image-viewer-next .material-icons {
         font-size: 24px;
     }
+}
+
+/* ================= 업로드 완료 팝업 ================= */
+.upload-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.upload-modal.show {
+    display: flex;
+}
+
+.upload-modal-content {
+    background: #fff;
+    width: 85%;
+    max-width: 350px;
+    padding: 24px 20px;
+    text-align: center;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    animation: popUp 0.3s ease;
+}
+
+.upload-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e1e1e;
+    margin-bottom: 18px;
+}
+
+.upload-ok-btn {
+    width: 100%;
+    padding: 12px;
+    background: #009ab7;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.upload-ok-btn:hover {
+    background: #0088a3;
+}
+
+/* 등장 애니메이션 */
+@keyframes popUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ===============================
+   🔥 저장 완료 팝업 createlost 동일 스타일 적용
+================================ */
+#uploadModal.show {
+    display: flex !important;
+}
+
+#uploadModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+/* 팝업 박스 확대 + 중앙 정렬 + createlost 디자인 맞춤 */
+.upload-modal-content, 
+.upload-modal-box {          /* 둘 중 적용된 클래스 자동 통합 */
+    background: white;
+    width: 300px;            /* 🔥 원본보다 넓게 */
+    padding: 26px 24px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+    animation: popUp 0.25s ease;
+}
+
+/* 텍스트 정돈 */
+.upload-modal-title, 
+.upload-ok-text {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: #1e1e1e;
+}
+
+/* =======================================
+   🔥 버튼 — createlost와 완전히 동일화
+======================================= */
+.upload-ok-btn {
+    width: 100%;
+    padding: 14px 0;
+    font-size: 17px;
+    border-radius: 10px;
+    background: #009ab7;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.upload-ok-btn:hover {
+    background: #0088a3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,154,183,0.3);
+}
+
+/* 등장 애니메이션 유지 */
+@keyframes popUp {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }

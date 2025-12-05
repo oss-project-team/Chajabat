@@ -2,16 +2,12 @@
    createfind.js – 최종 통합 버전 (글쓰기 + 수정 + 모달 + 이미지 + 이동)
    ========================================================================= */
 
-/* ------------------------------ 
-   URL 파라미터 (edit 모드 확인)
------------------------------- */
+/* URL 파라미터 (edit 모드 확인) */
 const params = new URLSearchParams(window.location.search);
-const editId = params.get("edit"); // 있으면 수정 모드
-const origin = params.get("origin"); // search → 뒤로가기 시 검색으로 돌아감
+const editId = params.get("edit");
+const origin = params.get("origin");
 
-/* ------------------------------ 
-   게시물 데이터 구조
------------------------------- */
+/* 게시물 데이터 구조 */
 let postData = {
     id: editId ? Number(editId) : Date.now(),
     images: [],
@@ -22,20 +18,19 @@ let postData = {
     foundDate: ""
 };
 
-/* ------------------------------ 
-   DOM 요소
------------------------------- */
+/* DOM 요소 리스트 */
 let backBtn, imageUpload, imagePreviewList, uploadBtn;
 let titleInput, titleCount, descriptionInput, descriptionCount;
 let categoryButtons, locationInput, foundDateInput, submitBtn;
 let confirmModal, cancelBtn, confirmBtn, modalPreview;
 let imageViewerModal, viewerImage, imageViewerIndex, closeImageViewer;
+let uploadModal, uploadOkBtn;
 
 let currentImageIndex = 0;
 const MAX_IMAGES = 5;
 
 /* =========================================================================
-   이미지 업로드 기능
+   이미지 업로드
 =========================================================================== */
 function setupImageUpload() {
     imageUpload.addEventListener("change", (e) => {
@@ -74,7 +69,7 @@ function updatePreview() {
 }
 
 /* =========================================================================
-   모달
+   확인 모달
 =========================================================================== */
 function showConfirmModal() {
     modalPreview.innerHTML = `
@@ -82,32 +77,57 @@ function showConfirmModal() {
             <div class="preview-item-label">제목</div>
             <div class="preview-item-value">${postData.title}</div>
         </div>
+        <div class="preview-item">
+            <div class="preview-item-label">카테고리</div>
+            <div class="preview-item-value">${postData.category}</div>
+        </div>
+        <div class="preview-item">
+            <div class="preview-item-label">설명</div>
+            <div class="preview-item-value">${postData.description}</div>
+        </div>
+        <div class="preview-item">
+            <div class="preview-item-label">장소</div>
+            <div class="preview-item-value">${postData.location}</div>
+        </div>
+        <div class="preview-item">
+            <div class="preview-item-label">날짜</div>
+            <div class="preview-item-value">${postData.foundDate}</div>
+        </div>
+        <div class="preview-images">
+            ${postData.images.map(i => `<img src="${i}">`).join("")}
+        </div>
     `;
     confirmModal.classList.add("show");
 }
 
 /* =========================================================================
-   게시물 저장 (신규 + 수정)
+   게시물 저장 (신규/수정)
 =========================================================================== */
 function savePost() {
     let posts = JSON.parse(localStorage.getItem("foundPosts")) || [];
 
     if (editId) {
-        // 수정 모드
         posts = posts.map(p =>
-            p.id == editId ? {
-                ...p,
-                title: postData.title,
-                description: postData.description,
-                category: postData.category,
-                place: postData.location,
-                date: postData.foundDate,
-                img: postData.images[0] || null
-            } :
-            p
+            p.id == editId
+                ? {
+                    ...p,
+                    title: postData.title,
+                    description: postData.description,
+                    category: postData.category,
+                    place: postData.location,
+                    date: postData.foundDate,
+                    img: postData.images[0] || null
+                }
+                : p
         );
     } else {
-        // 새 글쓰기 모드
+        // 회원가입 시 저장된 닉네임 사용
+        let nickname = localStorage.getItem("nickname");
+        // nickname이 없으면 기본값 설정 및 저장
+        if (!nickname || nickname.trim() === "") {
+            nickname = "사용자" + Date.now().toString().slice(-6);
+            localStorage.setItem("nickname", nickname);
+        }
         posts.push({
             id: postData.id,
             title: postData.title,
@@ -116,7 +136,8 @@ function savePost() {
             place: postData.location,
             date: postData.foundDate,
             img: postData.images[0] || null,
-            solved: false
+            solved: false,
+            author: nickname.trim()
         });
     }
 
@@ -124,13 +145,23 @@ function savePost() {
 }
 
 /* =========================================================================
+   업로드 완료 팝업
+=========================================================================== */
+function showUploadModal() {
+    uploadModal.classList.add("show");
+}
+
+/* =========================================================================
    이벤트 바인딩
 =========================================================================== */
 function setupEvents() {
+
     /* 뒤로가기 */
     backBtn.addEventListener("click", () => {
         if (origin === "search") {
             window.location.href = "../search/search.html";
+        } else if (origin === "detail") {
+            history.back();
         } else {
             window.location.href = "../home/home.html";
         }
@@ -145,31 +176,27 @@ function setupEvents() {
         });
     });
 
-    /* 제목 */
+    /* 입력 반영 */
     titleInput.addEventListener("input", () => {
         postData.title = titleInput.value;
-        titleCount.textContent = titleInput.value.length;
+        titleCount.textContent = postData.title.length;
     });
 
-    /* 설명 */
     descriptionInput.addEventListener("input", () => {
         postData.description = descriptionInput.value;
-        descriptionCount.textContent = descriptionInput.value.length;
+        descriptionCount.textContent = postData.description.length;
     });
 
-    /* 장소 */
     locationInput.addEventListener("input", () => {
         postData.location = locationInput.value;
     });
 
-    /* 날짜 */
     foundDateInput.addEventListener("change", () => {
         postData.foundDate = foundDateInput.value;
     });
 
     /* 이미지 삭제/확대 */
     imagePreviewList.addEventListener("click", (e) => {
-        // 이미지 삭제
         const btn = e.target.closest(".remove-btn");
         if (btn) {
             const index = Number(btn.dataset.index);
@@ -177,7 +204,6 @@ function setupEvents() {
             updatePreview();
             return;
         }
-
 
         if (e.target.tagName === "IMG") {
             currentImageIndex = Number(e.target.dataset.index);
@@ -191,7 +217,7 @@ function setupEvents() {
         imageViewerModal.classList.remove("show");
     });
 
-    /* 작성 완료 → 모달 열기 */
+    /* 작성 완료 클릭 */
     submitBtn.addEventListener("click", () => {
         if (!postData.title.trim()) return alert("제목을 입력하세요.");
         if (!postData.description.trim()) return alert("설명을 입력하세요.");
@@ -202,24 +228,30 @@ function setupEvents() {
         showConfirmModal();
     });
 
-    /* 모달 취소 */
+    /* 확인 모달 취소 */
     cancelBtn.addEventListener("click", () => {
         confirmModal.classList.remove("show");
     });
 
-    /* 모달 → 올리기 */
+    /* 올리기 */
     confirmBtn.addEventListener("click", () => {
         savePost();
-
         confirmModal.classList.remove("show");
-        alert("게시물이 저장되었습니다!");
+        showUploadModal();
+    });
 
-        window.location.href = "../home/home.html";
+    /* 업로드 완료 → 홈 또는 detail 이동 */
+    uploadOkBtn.addEventListener("click", () => {
+        if (editId && origin === "detail") {
+            window.location.href = `../detail/detail.html?id=${editId}`;
+        } else {
+            window.location.href = "../home/home.html";
+        }
     });
 }
 
 /* =========================================================================
-   수정 모드일 경우 데이터 불러오기
+   수정모드 데이터 로드
 =========================================================================== */
 function loadEditData() {
     if (!editId) return;
@@ -228,7 +260,6 @@ function loadEditData() {
     const target = posts.find(p => p.id == editId);
     if (!target) return;
 
-    // 입력창에 값 채우기
     titleInput.value = target.title;
     descriptionInput.value = target.description;
     locationInput.value = target.place;
@@ -237,7 +268,6 @@ function loadEditData() {
     postData.category = target.category;
     postData.images = target.img ? [target.img] : [];
 
-    // 카테고리 활성화
     categoryButtons.forEach(btn => {
         if (btn.dataset.category === target.category) {
             btn.classList.add("active");
@@ -262,7 +292,6 @@ document.addEventListener("DOMContentLoaded", () => {
     descriptionCount = document.getElementById("descriptionCount");
 
     categoryButtons = document.querySelectorAll(".category-btn");
-
     locationInput = document.getElementById("location");
     foundDateInput = document.getElementById("foundDate");
     submitBtn = document.getElementById("submitBtn");
@@ -276,6 +305,9 @@ document.addEventListener("DOMContentLoaded", () => {
     viewerImage = document.getElementById("viewerImage");
     imageViewerIndex = document.getElementById("imageViewerIndex");
     closeImageViewer = document.getElementById("closeImageViewer");
+
+    uploadModal = document.getElementById("uploadModal");
+    uploadOkBtn = document.getElementById("uploadOkBtn");
 
     setupImageUpload();
     setupEvents();

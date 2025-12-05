@@ -996,3 +996,43 @@ textarea {
         font-size: 24px;
     }
 }
+
+#uploadModal {
+    display:none;
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.55);
+    align-items:center;
+    justify-content:center;
+    z-index:3000;
+}
+#uploadModal.show{display:flex;}
+
+.upload-modal-box{
+    background:#fff;
+    width:280px;
+    padding:24px 20px;
+    border-radius:14px;
+    text-align:center;
+    box-shadow:0 4px 18px rgba(0,0,0,0.25);
+}
+
+.upload-modal-title{
+    font-size:17px;
+    font-weight:600;
+    margin-bottom:18px;
+}
+
+.upload-ok-btn{
+    width:120px;
+    height:42px;
+    background:#009ab7;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin:auto;
+}
+.upload-ok-btn:hover{background:#007ea0;}

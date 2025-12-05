@@ -24,7 +24,18 @@ app.config['SECRET_KEY'] = 'rhwkddksskrpgowntpdy'
 
 #CORS 설정
 CORS(app)
+# ---------------------------------
+# OPTIONS 요청 직접 허용 
+# ---------------------------------
 
+@app.before_request
+def handle_options():
+    if request.method == "OPTIONS":
+        response = app.make_response('')
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        return response
 # ---------------------------------
 # 모든 응답에 CORS 헤더 강제 추가 ← 이것이 핵심
 # ---------------------------------

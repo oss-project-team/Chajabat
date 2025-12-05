@@ -11,6 +11,9 @@ from flask_cors import CORS
 import smtplib
 from email.mime.text import MIMEText
 
+
+import os
+
 # --- 서버 설정 ---
 
 # app이라는 이름의 Flask 서버를 생성
@@ -21,6 +24,12 @@ app.config['SECRET_KEY'] = 'rhwkddksskrpgowntpdy'
 
 #CORS 설정
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+# SMTP 환경변수 읽기 (Render 환경변수 사용 권장)
+SMTP_EMAIL = os.getenv("SMTP_EMAIL")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+
+
 
 # (임시) 데이터베이스 대신 파이썬 딕셔너리(변수)를 사용합니다.
 # (서버를 껐다 켜면 회원가입한 정보가 사라집니다.)
@@ -42,15 +51,18 @@ next_alert_id = 1
 # ------------------------------------------------------
 # (추가) 실제 이메일 전송 기능 (Gmail SMTP)
 # ------------------------------------------------------
-SMTP_EMAIL = "YOUR_GMAIL@gmail.com"     #  네 Gmail 주소
-SMTP_PASSWORD = "YOUR_APP_PASSWORD"      #  앱 비밀번호 (16자리)
-
 def send_email(to_email, code):
-    """ 실제 이메일 전송 함수 """
+    #환경변수 없을 경우 안내
+    if not SMTP_EMAIL or not SMTP_PASSWORD:
+        print("SMTP 환경변수가 설정되지 않아 이메일을 보낼 수 없습니다.")
+        return
+
+
     msg = MIMEText(f"인증코드는 다음과 같습니다:\n\n{code}\n\nCHAJABAT 서비스 인증용 코드입니다.")
     msg['Subject'] = "CHAJABAT 인증코드"
     msg['From'] = SMTP_EMAIL
     msg['To'] = to_email
+
 
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
@@ -97,20 +109,19 @@ def login_required(f):
 # ------------------------------------------------
 # 0. 이메일 인증 
 # ------------------------------------------------
-@app.route('/api/v1/auth/send-code', methods=['POST'])
+@app.route("/api/v1/auth/send-code", methods=["POST"])
 def send_code_route():
     data = request.json
-    email = data.get('email')
+    email = data.get("email")
 
     if not email:
         return jsonify({"error": "이메일을 입력해주세요."}), 400
 
     code = str(random.randint(100000, 999999))
     email_codes[email] = code
-
+    
     # 이메일 실제 발송
     send_email(email, code)
-
     return jsonify({"message": "인증 코드가 이메일로 전송되었습니다."}), 200
 
 
@@ -181,7 +192,10 @@ def signup():
     # 기본 입력 체크
     if not all([email, password, nickname]):
         return jsonify({"error": "필수 정보를 모두 입력해주세요."}), 400
-    
+
+    #이메일 인증 체크
+    if email not in verified_emails:
+        return jsonify({"error": "이메일 인증이 필요합니다."}), 400
     # (검증) 이미 가입된 이메일인지 확인
     if email in users:
         # 400: Bad Request (잘못된 요청)
@@ -196,10 +210,7 @@ def signup():
         'password': hashed_password 
     }
     
-    
-   
-
-    print("회원가입 성공:", users) #백엔드 개발자가 보는 서버 로그
+    verified_emails.remove(email)
     
     # 201: Created (성공적으로 생성됨)
     return jsonify({"message": "회원가입이 성공적으로 완료되었습니다."}), 201

@@ -256,13 +256,13 @@ def login():
         }
 
         # 200: OK (성공)
-         return jsonify({
+        return jsonify({
             'access_token': access_token,
             'refresh_token': refresh_token,
             'nickname': user['nickname']   # 
         }), 200
         # 401: Unauthorized (인증 실패)
-        return jsonify({"error": "이메일 또는 비밀번호가 일치하지 않습니다."}), 401
+    return jsonify({"error": "이메일 또는 비밀번호가 일치하지 않습니다."}), 401
     
 # (추가) 토큰 재발급
 @app.route('/api/v1/auth/refresh', methods=['POST'])

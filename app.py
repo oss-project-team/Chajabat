@@ -47,11 +47,7 @@ def add_cors_headers(response):
     return response
 
 
-# MailSlurp API Key 설정 
-MAILSLURP_API_KEY = os.getenv("MAILSLURP_API_KEY")
 
-mail_config = Configuration()
-mail_config.api_key["x-api-key"] = MAILSLURP_API_KEY
 
 # (임시) 데이터베이스 대신 파이썬 딕셔너리(변수)를 사용합니다.
 # (서버를 껐다 켜면 회원가입한 정보가 사라집니다.)

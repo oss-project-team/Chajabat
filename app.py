@@ -7,10 +7,9 @@ from functools import wraps  # 데코레이터 (로그인 체크용)
 import random
 from flask_cors import CORS
 
-#(추가) 이메일 전송용 모듈
-import smtplib
-import ssl
-from email.mime.text import MIMEText
+#Resend API 사용
+import resend 
+
 
 
 import os
@@ -46,10 +45,11 @@ def add_cors_headers(response):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     return response
-# SMTP 환경변수 읽기 (Render 환경변수 사용 권장)
-SMTP_EMAIL = os.getenv("SMTP_EMAIL")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
+
+# Resend API KEY 적용
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+resend.api_key = RESEND_API_KEY
 
 
 # (임시) 데이터베이스 대신 파이썬 딕셔너리(변수)를 사용합니다.
@@ -73,27 +73,21 @@ next_alert_id = 1
 # (추가) 실제 이메일 전송 기능 (Gmail SMTP)
 # ------------------------------------------------------
 def send_email(to_email, code):
-    #환경변수 없을 경우 안내
-    if not SMTP_EMAIL or not SMTP_PASSWORD:
-        print("SMTP 환경변수가 설정되지 않아 이메일을 보낼 수 없습니다.")
+
+    if not RESEND_API_KEY:
+        print("RESEND_API_KEY 환경변수가 없음")
         return
 
-
-    msg = MIMEText(f"인증코드는 다음과 같습니다:\n\n{code}\n\nCHAJABAT 서비스 인증용 코드입니다.")
-    msg['Subject'] = "CHAJABAT 인증코드"
-    msg['From'] = SMTP_EMAIL
-    msg['To'] = to_email
-
-
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(SMTP_EMAIL, SMTP_PASSWORD)
-            server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
-
-        print(f"[메일 발송 성공] {to_email}")
+        response = resend.Emails.send({
+            "from": "Chajabat <onboarding@resend.dev>",   #기본 도메인이라 사용 가능
+            "to": to_email,
+            "subject": "CHAJABAT 인증코드",
+            "html": f"<p>인증코드는 다음과 같습니다:</p><h2>{code}</h2>"
+        })
+        print("메일 발송 성공:", response)
     except Exception as e:
-        print("[메일 발송 오류] ", e)
+        print("메일 발송 실패:", e)
 
 # ------------------------------------------------
 # 공통 유틸: 로그인된 사용자만 접근하게 하는 데코레이터

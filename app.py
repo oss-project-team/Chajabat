@@ -422,6 +422,9 @@ def create_post():
         "images": images,
         "status": "Waiting",   # 기본값: 찾는 중
         "author_email": request.user_email,
+        # 닉네임 저장
+        "author_nickname": author_nickname,
+        
         "created_at": datetime.datetime.utcnow().isoformat()
     }
     posts.append(post)
@@ -529,15 +532,7 @@ def get_post(post_id):
             return jsonify(p)
     return jsonify({"error": "게시글을 찾을 수 없습니다."}), 404
 
-# ------------------------------
-# 추가: 내가 작성한 게시글 조회
-# ------------------------------
-@app.route('/api/v1/posts/my', methods=['GET'])
-@login_required
-def get_my_posts():
-    email = request.user_email
-    my_posts = [p for p in posts if p['author_email'] == email]
-    return jsonify(my_posts), 200
+
 
 
 # 4) 게시글 수정 (작성자만)
@@ -558,6 +553,11 @@ def update_post(post_id):
             p['lost_date'] = data.get('lost_date', p['lost_date'])
             p['features'] = data.get('features', p['features'])
             p['images'] = data.get('images', p['images'])
+
+            # nickname 최신화
+            email = p['author_email']
+            if email in users:
+                p['author_nickname'] = users[email].get('nickname', '')
 
             return jsonify(p)
     return jsonify({"error": "게시글을 찾을 수 없습니다."}), 404

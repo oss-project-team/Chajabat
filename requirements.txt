@@ -3,4 +3,4 @@ pyjwt
 bcrypt
 gunicorn
 flask-cors
-resend
+mailslurp-client

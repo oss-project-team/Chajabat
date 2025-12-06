@@ -256,8 +256,11 @@ def login():
         }
 
         # 200: OK (성공)
-        return jsonify({'access_token': access_token, 'refresh_token': refresh_token}), 200
-    else:
+         return jsonify({
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'nickname': user['nickname']   # 
+        }), 200
         # 401: Unauthorized (인증 실패)
         return jsonify({"error": "이메일 또는 비밀번호가 일치하지 않습니다."}), 401
     
@@ -313,6 +316,8 @@ def refresh_token():
 
     except Exception:
         return jsonify({"error": "토큰 재발급에 실패했습니다."}), 401
+
+
     
 
 @app.route('/api/v1/auth/logout', methods=['POST'])
@@ -445,6 +450,16 @@ def get_post(post_id):
         if p['id'] == post_id:
             return jsonify(p)
     return jsonify({"error": "게시글을 찾을 수 없습니다."}), 404
+
+# ------------------------------
+# 추가: 내가 작성한 게시글 조회
+# ------------------------------
+@app.route('/api/v1/posts/my', methods=['GET'])
+@login_required
+def get_my_posts():
+    email = request.user_email
+    my_posts = [p for p in posts if p['author_email'] == email]
+    return jsonify(my_posts), 200
 
 
 # 4) 게시글 수정 (작성자만)

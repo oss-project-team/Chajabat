@@ -6,13 +6,14 @@ import datetime       # 토큰 만료 시간 설정 관련
 from functools import wraps  # 데코레이터 (로그인 체크용)
 import random
 from flask_cors import CORS
+import os
 
 #resend 라이브러리 추가
 import resend
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
-import os
+
 
 # --- 서버 설정 ---
 

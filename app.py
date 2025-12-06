@@ -9,9 +9,6 @@ from flask_cors import CORS
 
 #Resend API 사용
 import resend 
-
-
-
 import os
 
 # --- 서버 설정 ---
@@ -80,7 +77,7 @@ def send_email(to_email, code):
 
     try:
         response = resend.Emails.send({
-            "from": "Chajabat <onboarding@resend.dev>",   #기본 도메인이라 사용 가능
+            "from": "Chajabat <no-reply@YOUR_DOMAIN>",    
             "to": to_email,
             "subject": "CHAJABAT 인증코드",
             "html": f"<p>인증코드는 다음과 같습니다:</p><h2>{code}</h2>"

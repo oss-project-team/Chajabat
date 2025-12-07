@@ -120,7 +120,7 @@ async function renderAlerts(alerts) {
                 item.classList.toggle("open");
                 if(item.dataset.read==="false") {
                     item.dataset.read="true";
-                    // 읽음 처리 API 호출 (선택사항)
+                    // 읽음 처리 API 호출
                     markAlertAsRead(item.dataset.postId);
                 }
             });
@@ -136,14 +136,51 @@ async function markAlertAsRead(postId) {
     if (!accessToken) return;
 
     try {
-        await fetch(`https://chajabat.onrender.com/api/v1/alerts/${postId}/read`, {
+        const response = await fetch(`https://chajabat.onrender.com/api/v1/alerts/${postId}/read`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
             }
         });
+        
+        if (response.ok) {
+            // 읽음 처리 후 모든 알림이 읽었는지 확인
+            checkAllAlertsRead();
+        }
     } catch (error) {
         console.error('알림 읽음 처리 오류:', error);
+    }
+}
+
+/* ============================================================
+   모든 알림 읽음 확인 및 홈 페이지 배지 업데이트
+============================================================ */
+async function checkAllAlertsRead() {
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) return;
+    
+    try {
+        const response = await fetch('https://chajabat.onrender.com/api/v1/alerts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const alerts = await response.json();
+            const unreadCount = alerts.filter(alert => !alert.seen).length;
+            
+            // 모든 알림을 읽었으면 localStorage에 플래그 설정
+            if (unreadCount === 0) {
+                localStorage.setItem('allAlertsRead', 'true');
+            } else {
+                localStorage.setItem('allAlertsRead', 'false');
+            }
+        }
+    } catch (error) {
+        console.error('알림 읽음 확인 오류:', error);
     }
 }
 

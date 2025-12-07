@@ -220,9 +220,54 @@ document.addEventListener("DOMContentLoaded", () => {
     if (writeBtn) writeBtn.addEventListener("click", () => { pushHistory(); window.location.href = boardType==="Found" ? "../createfind/createfind.html" : "../createlost/createlost.html"; });
 
     renderCards();
+    
+    // 알림 배지 업데이트
+    updateNotificationBadge();
 });
 
 
+
+/* ================== 🔔 알림 배지 업데이트 ================== */
+async function updateNotificationBadge() {
+    const badge = document.querySelector(".notification-badge");
+    if (!badge) return;
+    
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+        badge.style.display = 'none';
+        return;
+    }
+    
+    try {
+        const response = await fetch('https://chajabat.onrender.com/api/v1/alerts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const alerts = await response.json();
+            // 읽지 않은 알림 개수 확인
+            const unreadCount = alerts.filter(alert => !alert.seen).length;
+            
+            if (unreadCount > 0) {
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        } else if (response.status === 404) {
+            // 알림 API가 없는 경우 배지 숨김
+            badge.style.display = 'none';
+        } else {
+            badge.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('알림 배지 업데이트 오류:', error);
+        badge.style.display = 'none';
+    }
+}
 
 /* ================== 🔔 notice 이동 ================== */
 const noticeBtn = document.querySelector(".notification-btn");
@@ -232,6 +277,19 @@ if(noticeBtn){
         window.location.href = "../notice/notice.html";
     });
 }
+
+/* ================== 🔔 페이지 포커스 시 알림 배지 업데이트 ================== */
+// 다른 페이지에서 돌아왔을 때 알림 배지 업데이트
+window.addEventListener('focus', () => {
+    updateNotificationBadge();
+});
+
+// 페이지가 보일 때마다 알림 배지 업데이트
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        updateNotificationBadge();
+    }
+});
 
 /* ================== ⚙ settings 이동 ================== */
 document.querySelectorAll(".icon-btn.settings-btn")?.forEach(btn=>{

@@ -1,0 +1,162 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.logo {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 40px auto;
+    display: block;
+}
+
+label {
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #949494;
+    font-weight: 400;
+}
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+}
+
+input {
+    width: 100%;
+    padding: 14px 0;
+    margin-bottom: 25px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 16px;
+    text-align: left;
+    display: block;
+    color: #1e1e1e;
+    background-color: transparent;
+    height: 48px;
+    line-height: 20px;
+    outline: none;
+}
+
+.password-wrapper input {
+    margin-bottom: 0;
+    padding-right: 40px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #949494;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    z-index: 1;
+    box-shadow: none;
+    font-size: 20px;
+    user-select: none;
+}
+
+.password-toggle:hover {
+    color: #009ab7;
+}
+
+input::placeholder {
+    color: #1e1e1e;
+}
+
+input:focus {
+    border-bottom-color: #009ab7;
+}
+
+.error-message {
+    display: none;
+    width: 100%;
+    text-align: center;
+    color: #ff3b30;
+    font-size: 14px;
+    margin-bottom: 8px;
+    min-height: 20px;
+}
+
+.error-message.show {
+    display: block;
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    background-color: #009ab7;
+    border: none;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0088a3;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.menu {
+    margin-top: 25px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.menu-left {
+    text-align: left;
+}
+
+.menu-right {
+    text-align: right;
+}
+
+.menu a {
+    color: #949494;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.menu a:hover {
+    color: #009ab7;
+}

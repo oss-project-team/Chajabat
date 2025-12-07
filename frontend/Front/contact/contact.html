@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>쪽지함</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="contact.css">
+</head>
+
+<body>
+
+<div id="contactList" class="active">
+
+    <header class="top-header">
+        <span>쪽지함</span>
+
+        <div class="right-icons">
+            <i class="material-icons" id="noticeBtn">notifications</i>
+            <i class="material-icons" id="settingBtn">settings</i>
+        </div>
+    </header>
+
+    <div class="contact-wrapper">
+        <!-- 쪽지 목록은 JavaScript에서 동적으로 생성됩니다 -->
+    </div>
+</div>
+
+<div id="chatWindow">
+
+    <header class="chat-header">
+        <button class="back-btn" onclick="closeChat()"><i class="material-icons">arrow_back</i></button>
+        <span id="chatName"></span>
+
+        <button class="chat-bell-btn" onclick="toggleChatAlarm()">
+            <i id="chatBellIcon" class="material-icons chat-bell-icon">notifications</i>
+        </button>
+    </header>
+
+    <div id="chatContent" class="chat-content"></div>
+
+    <div class="chat-input-area">
+        <input id="chatInput" placeholder="메시지를 입력하세요" onkeydown="handleEnter(event)">
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal-bg">
+    <div class="modal-box">
+        <p id="deleteText">정말 삭제하시겠습니까?</p>
+        <div class="btn-area">
+            <button id="deleteConfirm" class="ok-btn">확인</button>
+            <button id="deleteCancel" class="cancel-btn">취소</button>
+        </div>
+    </div>
+</div>
+
+<div id="imgModal" class="img-modal">
+    <span class="close-modal">&times;</span>
+    <img id="modalImg" class="modal-content-img" alt="확대 이미지">
+</div>
+
+<nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" onclick="location.reload()">
+        <i class="material-icons nav-icon">mail</i>
+        <span class="nav-label">쪽지함</span>
+    </button>
+    
+    <button class="nav-item" onclick="location.href='../home/home.html'">
+        <i class="material-icons nav-icon">home</i>
+        <span class="nav-label">홈</span>
+    </button>
+
+    <button class="nav-item" onclick="location.href='../mypage/mypage.html'">
+        <i class="material-icons nav-icon">person</i>
+        <span class="nav-label">마이페이지</span>
+    </button>
+</nav>
+
+<script src="contact.js"></script>
+</body>
+</html>

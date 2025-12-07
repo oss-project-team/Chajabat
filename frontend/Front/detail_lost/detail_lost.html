@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>분실했어요 - 상세페이지</title>
+    <link rel="stylesheet" href="detail_lost.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="detail-header">
+            <button id="backBtn"><i class="material-icons">arrow_back</i></button>
+        </header>
+
+        <div class="detail-image-box">
+            <img id="detailImage" src="">
+        </div>
+
+        <div class="detail-user-section">
+            <div class="user-info">
+                <div class="user-profile"></div>
+                <div class="user-name">닉네임</div>
+            </div>
+
+            <div class="user-status">
+                <span class="status-dot"></span>
+                <span class="status-text">해결 중</span>
+                <button id="statusToggleBtn" class="status-toggle-btn" style="display: none;" title="상태 전환">
+                    <i class="material-icons">autorenew</i>
+                </button>
+            </div>
+        </div>
+
+        <div class="detail-card">
+            <div class="detail-category" id="detailCategory">카테고리</div>
+            <div class="detail-title" id="detailTitle">제목 불러오는 중...</div>
+            <div class="detail-desc" id="detailDesc">내용 로딩중...</div>
+
+            <div class="detail-info-box">
+                <div class="info-row">
+                    <span class="info-label">분실 장소</span>
+                    <span class="info-value" id="detailPlace"></span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">분실 날짜</span>
+                    <span class="info-value" id="detailDate"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-owner-wrap" id="ownerBtns" style="display:none;">
+            <button id="editBtn" class="btn-owner-edit">수정하기</button>
+            <button id="deleteBtn" class="btn-owner-delete">삭제하기</button>
+        </div>
+
+        <button id="msgBtn" class="btn-msg" style="display:none;">쪽지 보내기</button>
+    </div>
+
+    <!--  삭제 모달 -->
+    <div class="modal-overlay" id="deleteConfirmModal">
+        <div class="modal-content">
+            <h3 class="modal-title">정말로 이 게시물을 삭제하시겠습니까?</h3>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" id="deleteCancelBtn">취소</button>
+                <button class="modal-btn confirm-btn" id="deleteConfirmBtn">삭제</button>
+                </div>
+            </div>
+        </div>
+
+    <!-- 삭제 성공 팝업 -->
+    <div class="success-popup" id="successPopup">
+        <div class="popup-content">
+            <div class="popup-icon">✓</div>
+            <div class="popup-message" id="popupMessage">게시물이 삭제되었습니다.</div>
+            <button class="popup-close-btn" id="popupCloseBtn">확인</button>
+        </div>
+    </div>
+
+    <script src="detail_lost.js"></script>
+</body>
+</html>

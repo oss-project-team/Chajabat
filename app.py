@@ -109,6 +109,13 @@ def login_required(f):
             return jsonify({"error": "토큰이 만료되었습니다."}), 401
         except jwt.InvalidTokenError:
             return jsonify({"error": "유효하지 않은 토큰입니다."}), 401
+        except Exception as e:
+            print("JWT decode error:", e)
+            return jsonify({"error": "토큰 처리 중 오류 발생"}), 401
+
+        # email이 없으면 401
+        if 'email' not in payload:
+            return jsonify({"error": "토큰에 사용자 정보가 없습니다."}), 401
 
         # 이후 라우트에서 현재 로그인한 유저 이메일을 쓰고 싶을 때 사용
         request.user_email = payload['email']
@@ -127,6 +134,7 @@ def send_code_route():
 
     if not email:
         return jsonify({"error": "이메일을 입력해주세요."}), 400
+    
 
     code = str(random.randint(100000, 999999))
     email_codes[email] = code

@@ -221,7 +221,7 @@ document.getElementById("confirmBtn").addEventListener("click", async () => {
 
     try {
         // 수정 모드인 경우
-        if (editId) {
+    if (editId) {
             const response = await fetch(`https://chajabat.onrender.com/api/v1/posts/${editId}`, {
                 method: 'PUT',
                 headers: {
@@ -247,22 +247,22 @@ document.getElementById("confirmBtn").addEventListener("click", async () => {
             
             // 성공 시 localStorage에도 업데이트 (fallback)
             let lostPosts = JSON.parse(localStorage.getItem("lostPosts")) || [];
-            lostPosts = lostPosts.map(p =>
-                p.id == editId
-                    ? {
-                        ...p,
-                        title: postData.title,
-                        description: postData.description,
-                        category: postData.category,
-                        place: postData.location,
-                        date: postData.lostDate,
-                        img: postData.images[0] ? postData.images[0].url : null
-                    }
-                    : p
-            );
+        lostPosts = lostPosts.map(p =>
+            p.id == editId
+                ? {
+                    ...p,
+                    title: postData.title,
+                    description: postData.description,
+                    category: postData.category,
+                    place: postData.location,
+                    date: postData.lostDate,
+                    img: postData.images[0] ? postData.images[0].url : null
+                }
+                : p
+        );
             localStorage.setItem("lostPosts", JSON.stringify(lostPosts));
-        } else {
-            // 신규 작성
+    } else {
+        // 신규 작성
             const response = await fetch('https://chajabat.onrender.com/api/v1/posts', {
                 method: 'POST',
                 headers: {
@@ -290,21 +290,21 @@ document.getElementById("confirmBtn").addEventListener("click", async () => {
             // 성공 시 localStorage에도 저장 (fallback)
             let lostPosts = JSON.parse(localStorage.getItem("lostPosts")) || [];
             let nickname = localStorage.getItem("nickname") || "사용자";
-            lostPosts.push({
+        lostPosts.push({
                 id: data.id || postData.id,
-                img: postData.images[0] ? postData.images[0].url : null,
-                title: postData.title,
-                description: postData.description,
-                place: postData.location,
-                date: postData.lostDate,
-                solved: false,
-                category: postData.category,
-                author: nickname.trim()
-            });
+            img: postData.images[0] ? postData.images[0].url : null,
+            title: postData.title,
+            description: postData.description,
+            place: postData.location,
+            date: postData.lostDate,
+            solved: false,
+            category: postData.category,
+            author: nickname.trim()
+        });
             localStorage.setItem("lostPosts", JSON.stringify(lostPosts));
-        }
+    }
 
-        confirmModal.classList.remove("show");
+    confirmModal.classList.remove("show");
         document.getElementById("uploadModal").classList.add("show");
     } catch (error) {
         console.error('게시글 저장 오류:', error);
@@ -348,18 +348,25 @@ async function loadEditData() {
         if (response.ok) {
             const target = await response.json();
             
-            titleInput.value = target.title;
-            descInput.value = target.content || target.description;
-            document.getElementById("location").value = target.location;
-            document.getElementById("lostDate").value = target.lost_date || target.date;
-            titleCount.textContent = target.title.length;
+            // 입력 필드에 기존 값 채우기
+            titleInput.value = target.title || '';
+            descInput.value = target.content || target.description || '';
+            document.getElementById("location").value = target.location || '';
+            document.getElementById("lostDate").value = target.lost_date || target.date || '';
+            titleCount.textContent = (target.title || '').length;
             descCount.textContent = (target.content || target.description || '').length;
 
-            postData.category = target.category;
+            // postData 객체도 업데이트
+            postData.title = target.title || '';
+            postData.description = target.content || target.description || '';
+            postData.location = target.location || '';
+            postData.lostDate = target.lost_date || target.date || '';
+            postData.category = target.category || '';
             postData.images = target.images && target.images.length > 0 
                 ? target.images.map(img => ({ url: img }))
                 : (target.img ? [{ url: target.img }] : []);
 
+            // 카테고리 버튼 활성화
             document.querySelectorAll(".category-btn").forEach(btn => {
                 if (btn.dataset.category === target.category) {
                     btn.classList.add("active");
@@ -373,16 +380,23 @@ async function loadEditData() {
             const target = posts.find(p => p.id == editId);
             if (!target) return;
 
-            titleInput.value = target.title;
-            descInput.value = target.description;
-            document.getElementById("location").value = target.place;
-            document.getElementById("lostDate").value = target.date;
-            titleCount.textContent = target.title.length;
-            descCount.textContent = target.description.length;
+            // 입력 필드에 기존 값 채우기
+            titleInput.value = target.title || '';
+            descInput.value = target.description || '';
+            document.getElementById("location").value = target.place || '';
+            document.getElementById("lostDate").value = target.date || '';
+            titleCount.textContent = (target.title || '').length;
+            descCount.textContent = (target.description || '').length;
 
-            postData.category = target.category;
+            // postData 객체도 업데이트
+            postData.title = target.title || '';
+            postData.description = target.description || '';
+            postData.location = target.place || '';
+            postData.lostDate = target.date || '';
+            postData.category = target.category || '';
             postData.images = target.img ? [{ url: target.img }] : [];
 
+            // 카테고리 버튼 활성화
             document.querySelectorAll(".category-btn").forEach(btn => {
                 if (btn.dataset.category === target.category) {
                     btn.classList.add("active");
@@ -394,27 +408,27 @@ async function loadEditData() {
     } catch (error) {
         console.error('게시글 로드 오류:', error);
         // 에러 발생 시 localStorage에서 로드 (fallback)
-        let posts = JSON.parse(localStorage.getItem("lostPosts")) || [];
-        const target = posts.find(p => p.id == editId);
-        if (!target) return;
+    let posts = JSON.parse(localStorage.getItem("lostPosts")) || [];
+    const target = posts.find(p => p.id == editId);
+    if (!target) return;
 
-        titleInput.value = target.title;
-        descInput.value = target.description;
-        document.getElementById("location").value = target.place;
-        document.getElementById("lostDate").value = target.date;
-        titleCount.textContent = target.title.length;
-        descCount.textContent = target.description.length;
+    titleInput.value = target.title;
+    descInput.value = target.description;
+    document.getElementById("location").value = target.place;
+    document.getElementById("lostDate").value = target.date;
+    titleCount.textContent = target.title.length;
+    descCount.textContent = target.description.length;
 
-        postData.category = target.category;
-        postData.images = target.img ? [{ url: target.img }] : [];
+    postData.category = target.category;
+    postData.images = target.img ? [{ url: target.img }] : [];
 
-        document.querySelectorAll(".category-btn").forEach(btn => {
-            if (btn.dataset.category === target.category) {
-                btn.classList.add("active");
-            }
-        });
+    document.querySelectorAll(".category-btn").forEach(btn => {
+        if (btn.dataset.category === target.category) {
+            btn.classList.add("active");
+        }
+    });
 
-        renderPreview();
+    renderPreview();
     }
 }
 

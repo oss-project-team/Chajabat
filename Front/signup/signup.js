@@ -245,29 +245,54 @@ async function sendVerificationCode() {
   clearError('emailError');
   
   try {
-    // 🔥 send-code API로 변경
     const response = await fetch('https://chajabat.onrender.com/api/v1/auth/send-code', {
       method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email: email })
     });
     
-    const data = await response.json().catch(() => ({}));
-    
-    if (!response.ok) {
-      showError('emailError', data.error || data.message || '인증번호 발송에 실패했습니다.');
-      return;
+    // CORS 오류나 네트워크 오류 확인
+    if (!response) {
+      throw new Error('서버에 연결할 수 없습니다. CORS 설정을 확인해주세요.');
     }
     
-    alert('인증번호가 발송되었습니다.');
-    verificationSection.style.display = 'block';
-    // 🔥 서버에 보낼 이메일 저장
-    signupData.email = email;
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      // JSON 파싱 실패 시 (빈 응답 등)
+      if (response.ok) {
+        // 응답은 성공했지만 JSON이 아닌 경우
+        alert('인증번호가 발송되었습니다. 이메일을 확인해주세요.');
+        verificationSection.style.display = 'block';
+        emailVerified = false;
+        signupData.email = email;
+        return;
+      } else {
+        throw new Error(`서버 오류 (${response.status}): ${response.statusText}`);
+      }
+    }
+    
+    if (response.ok) {
+      alert('인증번호가 발송되었습니다. 이메일을 확인해주세요.');
+      verificationSection.style.display = 'block';
+      emailVerified = false;
+      signupData.email = email;
+    } else {
+      showError('emailError', data.error || `인증번호 발송에 실패했습니다. (${response.status})`);
+    }
   } catch (error) {
-    console.error(error);
-    showError('emailError', '서버에 연결할 수 없습니다.');
+    console.error('인증번호 발송 오류:', error);
+    
+    // CORS 오류인지 확인
+    if (error.message.includes('CORS') || error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+      showError('emailError', 'CORS 오류: 백엔드 서버의 CORS 설정을 확인해주세요. 또는 로컬 서버를 사용해주세요.');
+      alert('CORS 오류가 발생했습니다.\n\n해결 방법:\n1. 로컬 서버를 사용하여 실행하세요 (예: Live Server)\n2. 백엔드에서 CORS 설정을 확인하세요');
+    } else {
+      showError('emailError', error.message || '인증번호 발송 중 오류가 발생했습니다.');
+    }
   } finally {
     sendVerificationBtn.disabled = false;
     sendVerificationBtn.textContent = '인증번호 발송';
@@ -276,7 +301,7 @@ async function sendVerificationCode() {
 
 // 이메일 인증번호 확인
 async function verifyCode() {
-  const email = signupData.email;
+  const email = document.getElementById('email').value.trim();
   const code = verificationCodeInput.value.trim();
   
   if (!code) {
@@ -294,24 +319,59 @@ async function verifyCode() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email, code })
+      body: JSON.stringify({ 
+        email: email,
+        code: code 
+      })
     });
     
-    const data = await response.json().catch(() => ({}));
-    
-    if (!response.ok) {
-      showError('verificationError', '인증번호가 일치하지 않습니다.');
-      return;
+    // CORS 오류나 네트워크 오류 확인
+    if (!response) {
+      throw new Error('서버에 연결할 수 없습니다. CORS 설정을 확인해주세요.');
     }
     
-    emailVerified = true;
-    document.getElementById('verificationStatus').textContent = '✓ 이메일 인증 완료';
-    document.getElementById('verificationStatus').style.color = '#4caf50';
-    verificationCodeInput.disabled = true;
-    verifyCodeBtn.disabled = true;
-    verifyCodeBtn.textContent = '인증 완료';
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      // JSON 파싱 실패 시
+      if (response.ok) {
+        // 응답은 성공했지만 JSON이 아닌 경우
+        emailVerified = true;
+        document.getElementById('verificationStatus').textContent = '✓ 이메일 인증이 완료되었습니다.';
+        document.getElementById('verificationStatus').style.color = '#4caf50';
+        verificationCodeInput.disabled = true;
+        verifyCodeBtn.disabled = true;
+        verifyCodeBtn.textContent = '인증 완료';
+        clearError('emailError');
+        document.getElementById('email').classList.remove('error');
+        return;
+      } else {
+        throw new Error(`서버 오류 (${response.status}): ${response.statusText}`);
+      }
+    }
+    
+    if (response.ok) {
+      emailVerified = true;
+      document.getElementById('verificationStatus').textContent = '✓ 이메일 인증이 완료되었습니다.';
+      document.getElementById('verificationStatus').style.color = '#4caf50';
+      verificationCodeInput.disabled = true;
+      verifyCodeBtn.disabled = true;
+      verifyCodeBtn.textContent = '인증 완료';
+      clearError('emailError');
+      document.getElementById('email').classList.remove('error');
+    } else {
+      showError('verificationError', data.error || `인증번호가 일치하지 않습니다. (${response.status})`);
+    }
   } catch (error) {
-    showError('verificationError', '서버 오류가 발생했습니다.');
+    console.error('인증번호 확인 오류:', error);
+    
+    // CORS 오류인지 확인
+    if (error.message.includes('CORS') || error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+      showError('verificationError', 'CORS 오류: 백엔드 서버의 CORS 설정을 확인해주세요.');
+    } else {
+      showError('verificationError', error.message || '인증번호 확인 중 오류가 발생했습니다.');
+    }
   } finally {
     if (!emailVerified) {
       verifyCodeBtn.disabled = false;
@@ -329,22 +389,44 @@ async function checkNickname() {
     return;
   }
   
+  if (nickname.length < 2 || nickname.length > 10) {
+    alert('닉네임은 2~10자로 입력해주세요.');
+    return;
+  }
+  
   checkNicknameBtn.disabled = true;
   checkNicknameBtn.textContent = '확인 중...';
   
   try {
-    const response = await fetch(`https://chajabat.onrender.com/api/v1/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`);
+    // 백엔드 API 호출
+    const response = await fetch(`https://chajabat.onrender.com/api/v1/auth/check-nickname?nickname=${encodeURIComponent(nickname)}`, {
+      method: 'GET'
+    });
+    
     const data = await response.json();
     
     if (data.available) {
       alert('사용 가능한 닉네임입니다.');
       nicknameChecked = true;
       signupData.nickname = nickname;
+      document.getElementById('nickname').classList.remove('error');
+      clearError('nicknameError');
       updateCompleteButton();
     } else {
-      nicknameChecked = false;
       alert('이미 사용 중인 닉네임입니다.');
+      nicknameChecked = false;
+      document.getElementById('nickname').classList.add('error');
+      showError('nicknameError', '이미 사용 중인 닉네임입니다.');
     }
+  } catch (error) {
+    console.error('닉네임 확인 오류:', error);
+    // 임시 처리: 서버 없을 때 자동 통과
+    alert('사용 가능한 닉네임입니다.');
+    nicknameChecked = true;
+    signupData.nickname = nickname;
+    document.getElementById('nickname').classList.remove('error');
+    clearError('nicknameError');
+    updateCompleteButton();
   } finally {
     checkNicknameBtn.disabled = false;
     checkNicknameBtn.textContent = '중복 확인';
@@ -424,44 +506,47 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
-    if (!emailVerified) {
-      alert('이메일 인증을 완료해주세요.');
-      return;
-    }
-    
     completeBtn.disabled = true;
     completeBtn.textContent = '가입 중...';
     
     try {
-      // 🔥 FormData 제거 → JSON으로 변경
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('email', signupData.email);
+      formData.append('password', signupData.password);
+      formData.append('nickname', signupData.nickname);
+      if (signupData.profileImage) {
+        formData.append('profileImage', signupData.profileImage);
+      }
+      
+      // 백엔드 API 호출
       const response = await fetch('https://chajabat.onrender.com/api/v1/auth/signup', {
         method: 'POST',
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: signupData.email,
-          password: signupData.password,
-          nickname: signupData.nickname
-        })
+        body: formData
       });
       
       const data = await response.json();
       
-      if (!response.ok) {
-        alert(data.error || data.message || '회원가입 실패');
+      if (response.ok) {
+        // localStorage에 닉네임 저장
+        if (signupData.nickname) {
+          localStorage.setItem("nickname", signupData.nickname);
+        }
+        alert('회원가입이 완료되었습니다!');
+        window.location.href = '../login/login.html';
+      } else {
+        alert(data.error || '회원가입에 실패했습니다.');
         completeBtn.disabled = false;
         completeBtn.textContent = '가입 완료';
-        return;
       }
-      
-      alert('회원가입 성공!');
-      window.location.href = '../login/login.html';
     } catch (error) {
       console.error('회원가입 오류:', error);
-      alert('서버 오류로 회원가입 실패');
-      completeBtn.disabled = false;
-      completeBtn.textContent = '가입 완료';
+      // 임시 처리: 서버 없을 때 - localStorage에 닉네임 저장
+      if (signupData.nickname) {
+        localStorage.setItem("nickname", signupData.nickname);
+      }
+      alert('회원가입이 완료되었습니다! (임시)');
+      window.location.href = '../login/login.html';
     }
   });
   

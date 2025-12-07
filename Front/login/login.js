@@ -2,15 +2,35 @@ document.addEventListener("DOMContentLoaded", function() {
     const loginBtn = document.getElementById("loginBtn");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
+    const errorMessage = document.getElementById("errorMessage");
+
+    // 에러 메시지 표시 함수
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.classList.add("show");
+    }
+
+    // 에러 메시지 숨기기 함수
+    function hideError() {
+        errorMessage.classList.remove("show");
+        errorMessage.textContent = "";
+    }
+
+    // 입력 필드에 포커스가 가면 에러 메시지 숨기기
+    emailInput.addEventListener("focus", hideError);
+    passwordInput.addEventListener("focus", hideError);
 
     loginBtn.addEventListener("click", async function () {
         const email = emailInput.value.trim();
         const pw = passwordInput.value;
 
         if (email === "" || pw === "") {
-            alert("이이메일과 비밀번호를 입력해주세요.");
+            showError("이메일과 비밀번호를 입력해주세요.");
             return;
         }
+
+        // 에러 메시지 숨기기
+        hideError();
 
         // 로딩 상태 표시
         loginBtn.disabled = true;
@@ -43,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             } catch (jsonError) {
                 console.error("JSON 파싱 오류:", jsonError);
-                alert("서버 응답을 처리하는 중 오류가 발생했습니다.");
+                showError("서버 응답을 처리하는 중 오류가 발생했습니다.");
                 return;
             }
 
@@ -68,9 +88,29 @@ document.addEventListener("DOMContentLoaded", function() {
                 // 이메일 저장 (작성자 확인용)
                 localStorage.setItem("user_email", email);
                 
-                // 닉네임도 저장 (회원가입 시 저장했다면)
+                // 닉네임 저장 (백엔드 응답에 있으면 사용, 없으면 프로필 API에서 가져오기)
                 if (data.nickname) {
                     localStorage.setItem("nickname", data.nickname);
+                } else {
+                    // 닉네임이 응답에 없으면 프로필 API에서 가져오기
+                    try {
+                        const profileResponse = await fetch('https://chajabat.onrender.com/api/v1/users/profile', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${data.access_token}`
+                            }
+                        });
+                        
+                        if (profileResponse.ok) {
+                            const profileData = await profileResponse.json();
+                            if (profileData.nickname) {
+                                localStorage.setItem("nickname", profileData.nickname);
+                            }
+                        }
+                    } catch (profileError) {
+                        console.error("프로필 로드 오류:", profileError);
+                    }
                 }
                 
                 // 홈 페이지로 이동
@@ -78,8 +118,8 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
                 // 로그인 실패 - 백엔드가 반환하는 error 메시지 표시
                 console.error("로그인 실패:", data);
-                const errorMsg = data.error || data.message || `로그인에 실패했습니다. (상태 코드: ${response.status})`;
-                alert(errorMsg);
+                const errorMsg = data.error || data.message || "이메일 또는 비밀번호가 일치하지 않습니다.";
+                showError(errorMsg);
             }
         } catch (error) {
             console.error("로그인 오류:", error);
@@ -115,4 +155,19 @@ document.addEventListener("DOMContentLoaded", function() {
             loginBtn.click();
         }
     });
+
+    // 비밀번호 보기/숨기기 토글
+    const passwordToggle = document.getElementById("passwordToggle");
+    if (passwordToggle) {
+        passwordToggle.addEventListener("click", function() {
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            
+            if (type === "password") {
+                passwordToggle.textContent = "visibility";
+            } else {
+                passwordToggle.textContent = "visibility_off";
+            }
+        });
+    }
 });

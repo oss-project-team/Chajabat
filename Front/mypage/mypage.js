@@ -55,7 +55,7 @@ async function loadMyPosts() {
             posts.forEach(post => {
                 const li = document.createElement("li");
                 const postType = post.type || post.postType || "found";
-                li.textContent = post.title + (postType === "found" ? " (찾음)" : " (분실)");
+                li.textContent = post.title;
 
                 li.addEventListener("click", () => {
                     if(postType === "lost")
@@ -96,7 +96,7 @@ async function loadMyPosts() {
 
             allPosts.forEach(post => {
                 const li = document.createElement("li");
-                li.textContent = post.title + (post.type==="found" ? " (찾음)" : " (분실)");
+                li.textContent = post.title;
 
                 li.addEventListener("click", () => {
                     if(post.type === "lost")
@@ -445,22 +445,39 @@ async function loadProfile(){
         if (response.ok) {
             const data = await response.json();
             
+            // 닉네임 표시 및 저장 (회원가입 시 설정한 닉네임)
             if (data.nickname) {
                 document.getElementById("nickname").textContent = data.nickname;
                 localStorage.setItem("nickname", data.nickname);
+            } else {
+                // 닉네임이 없으면 localStorage에서 확인
+                const storedNickname = localStorage.getItem("nickname");
+                if (storedNickname) {
+                    document.getElementById("nickname").textContent = storedNickname;
+                }
             }
             
             if (data.profileImage) {
                 document.getElementById("profileImage").src = data.profileImage;
                 localStorage.setItem("profileImage", data.profileImage);
+            } else {
+                // 프로필 이미지가 없으면 localStorage에서 확인
+                const storedImage = localStorage.getItem("profileImage");
+                if (storedImage) {
+                    document.getElementById("profileImage").src = storedImage;
+                }
             }
         } else {
             // API 실패 시 localStorage에서 로드 (fallback)
             const nickname = localStorage.getItem("nickname");
             const image = localStorage.getItem("profileImage");
 
-            if(nickname) document.getElementById("nickname").textContent = nickname;
-            if(image) document.getElementById("profileImage").src = image;
+            if(nickname) {
+                document.getElementById("nickname").textContent = nickname;
+            }
+            if(image) {
+                document.getElementById("profileImage").src = image;
+            }
         }
     } catch (error) {
         console.error("프로필 로드 오류:", error);

@@ -54,14 +54,23 @@
         </div>
     </div>
 
-    <!-- 🔥 삭제 모달 -->
+    <!--  삭제 모달 -->
     <div class="modal-overlay" id="deleteConfirmModal">
         <div class="modal-content">
             <h3 class="modal-title">정말로 이 게시물을 삭제하시겠습니까?</h3>
             <div class="modal-buttons">
                 <button class="modal-btn cancel-btn" id="deleteCancelBtn">취소</button>
                 <button class="modal-btn confirm-btn" id="deleteConfirmBtn">삭제</button>
+                </div>
             </div>
+        </div>
+
+    <!-- 삭제 성공 팝업 -->
+    <div class="success-popup" id="successPopup">
+        <div class="popup-content">
+            <div class="popup-icon">✓</div>
+            <div class="popup-message" id="popupMessage">게시물이 삭제되었습니다.</div>
+            <button class="popup-close-btn" id="popupCloseBtn">확인</button>
         </div>
     </div>
 

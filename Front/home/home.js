@@ -83,14 +83,14 @@ async function renderCards() {
             }
         } else {
             // API 실패 시 localStorage에서 로드 (fallback)
-            foundPosts = JSON.parse(localStorage.getItem("foundPosts")) || [];
-            lostPosts = JSON.parse(localStorage.getItem("lostPosts")) || [];
+    foundPosts = JSON.parse(localStorage.getItem("foundPosts")) || [];
+    lostPosts = JSON.parse(localStorage.getItem("lostPosts")) || [];
             targetPosts = (boardType === "Found" ? foundPosts : lostPosts)
                 .filter(post => !showOnlyInProgress || !post.solved)
                 .filter(post => selectedCategory === "전체" || post.category === selectedCategory);
         }
 
-        cardList.innerHTML = "";
+    cardList.innerHTML = "";
 
         if (targetPosts.length === 0) {
             cardList.innerHTML = "<div style='text-align:center; padding:20px; color:#777;'>게시글이 없습니다.</div>";
@@ -135,10 +135,10 @@ async function renderCards() {
         // 에러 발생 시 localStorage에서 로드 (fallback)
         foundPosts = JSON.parse(localStorage.getItem("foundPosts")) || [];
         lostPosts = JSON.parse(localStorage.getItem("lostPosts")) || [];
-        
-        let targetPosts = (boardType === "Found" ? foundPosts : lostPosts)
-            .filter(post => !showOnlyInProgress || !post.solved)
-            .filter(post => selectedCategory === "전체" || post.category === selectedCategory);
+
+    let targetPosts = (boardType === "Found" ? foundPosts : lostPosts)
+        .filter(post => !showOnlyInProgress || !post.solved)
+        .filter(post => selectedCategory === "전체" || post.category === selectedCategory);
 
         cardList.innerHTML = "";
 
@@ -147,31 +147,31 @@ async function renderCards() {
             return;
         }
 
-        targetPosts.sort((a, b) => (b.id || 0) - (a.id || 0));
+    targetPosts.sort((a, b) => (b.id || 0) - (a.id || 0));
 
-        targetPosts.forEach(post => {
-            const card = document.createElement("div");
-            card.className = "card";
+    targetPosts.forEach(post => {
+        const card = document.createElement("div");
+        card.className = "card";
 
-            card.innerHTML = `
-                ${post.img ? `<img class="card-image" src="${post.img}">` : `<div class="card-placeholder">이미지 없음</div>`}
-                <div class="card-content">
-                    <div class="card-title">${post.title}</div>
-                    <div class="card-date">${post.date}</div>
-                    <div class="card-place">${post.place}</div>
-                </div>
-            `;
+        card.innerHTML = `
+            ${post.img ? `<img class="card-image" src="${post.img}">` : `<div class="card-placeholder">이미지 없음</div>`}
+            <div class="card-content">
+                <div class="card-title">${post.title}</div>
+                <div class="card-date">${post.date}</div>
+                <div class="card-place">${post.place}</div>
+            </div>
+        `;
 
-            card.addEventListener("click", () => {
-                if(boardType === "Lost") {
-                    window.location.href = `../detail_lost/detail_lost.html?id=${post.id}`;
-                } else {
-                    window.location.href = `../detail/detail.html?id=${post.id}`;
-                }
-            });
+        card.addEventListener("click", () => {
+    if(boardType === "Lost") {
+        window.location.href = `../detail_lost/detail_lost.html?id=${post.id}`;
+    } else {
+        window.location.href = `../detail/detail.html?id=${post.id}`;
+    }
+});
 
-            cardList.appendChild(card);
-        });
+        cardList.appendChild(card);
+    });
     }
 }
 

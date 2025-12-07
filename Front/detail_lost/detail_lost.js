@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error) {
         console.error('게시글 로드 오류:', error);
         // 에러 발생 시 localStorage에서 로드 (fallback)
-        let posts = JSON.parse(localStorage.getItem("lostPosts")) || [];
+    let posts = JSON.parse(localStorage.getItem("lostPosts")) || [];
         post = posts.find(p => p.id === postId);
     }
 
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const currentUserEmail = localStorage.getItem('user_email') || '';
     const postAuthorEmail = post.author_email || '';
     const isAuthor = currentUserEmail && postAuthorEmail && currentUserEmail === postAuthorEmail;
-
+    
     // 작성자일 경우에만 수정/삭제 버튼 표시
     const ownerBtns = document.getElementById("ownerBtns");
     if (isAuthor) {
@@ -129,12 +129,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (response.ok) {
                 // localStorage에서도 삭제 (fallback)
                 let posts = JSON.parse(localStorage.getItem("lostPosts")) || [];
-                posts = posts.filter(p => p.id !== postId);
-                localStorage.setItem("lostPosts", JSON.stringify(posts));
+            posts = posts.filter(p => p.id !== postId);
+            localStorage.setItem("lostPosts", JSON.stringify(posts));
                 
                 deleteModal.classList.remove("show");
-                alert("게시물이 삭제되었습니다.");
-                location.replace("../home/home.html?type=Lost");
+                // 삭제 성공 팝업 표시
+                showDeleteSuccessPopup();
             } else {
                 const data = await response.json();
                 alert(data.error || '게시물 삭제에 실패했습니다.');
@@ -146,6 +146,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             deleteModal.classList.remove("show");
         }
     };
+    
+    // 삭제 성공 팝업 표시 함수
+    function showDeleteSuccessPopup() {
+        const popup = document.getElementById('successPopup');
+        const popupCloseBtn = document.getElementById('popupCloseBtn');
+        
+        popup.classList.add('show');
+        
+        const closePopup = () => {
+            popup.classList.remove('show');
+            location.replace("../home/home.html?type=Lost");
+        };
+        
+        popupCloseBtn.onclick = closePopup;
+        popup.onclick = (e) => {
+            if (e.target === popup) {
+                closePopup();
+            }
+        };
+    }
 
     /* ================== 🔙 뒤로가기 ================== */
     document.getElementById("backBtn").onclick = () => {

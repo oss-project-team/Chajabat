@@ -205,7 +205,7 @@ def signup():
     email = data.get('email')
     password = data.get('password')
     nickname = data.get('nickname')
-    profile_image = data.get('profileImage',")
+    profile_image = data.get('profileImage')
     # 기본 입력 체크
     if not all([email, password, nickname]):
         return jsonify({"error": "필수 정보를 모두 입력해주세요."}), 400
@@ -223,7 +223,7 @@ def signup():
     users[email] = {
         'nickname': nickname,
         'password': hashed_password,
-        'profileImage': "profile_image" 
+        'profileImage': profile_image
     }
     
 

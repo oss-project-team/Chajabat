@@ -781,4 +781,5 @@ def delete_keyword(keyword_id):
 # 아래 코드를 실행하라는 의미입니다.
 if __name__ == '__main__':
     # 5000번 포트로, 디버그 모드(코드 수정 시 자동 재시작)로 서버를 켭니다.
-    app.run(debug=True, port=5000)
+    # host='0.0.0.0'으로 설정하면 같은 네트워크의 다른 기기에서도 접속 가능합니다.
+    app.run(debug=True, host='0.0.0.0', port=5000)
